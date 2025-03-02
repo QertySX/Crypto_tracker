@@ -15,9 +15,9 @@ async def HTTPClient():
 
         async with aiohttp.ClientSession() as session:
             async with session.get(url, headers=headers) as response:
-                resp = await response.json()
-                filterResp = resp['data']
-                print(filterResp)
+                result = await response.json()
+                filterResponse = result['data']
+                print(filterResponse)
 
 
     except Exception as e:
