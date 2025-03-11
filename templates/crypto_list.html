@@ -1,9 +1,11 @@
 <div id="crypto-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
     {% if cryptos.error %}
         <p class="text-red-400 text-center text-lg">{{ cryptos.error }}</p>
+    {% elif not cryptos %}
+        <p class="text-gray-400 text-center text-lg">No cryptocurrencies found.</p>
     {% else %}
         {% for name, data in cryptos.items() %}
-            <div class="crypto-card rounded-xl p-6 backdrop-blur-sm">
+            <div class="crypto-card rounded-xl p-6 backdrop-blur-sm border border-gray-700" style="border-image: linear-gradient(45deg, #6366F1, #A855F7) 1; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);">
                 <h2 class="text-2xl font-semibold text-white mb-4">{{ name }}</h2>
                 <div class="space-y-3">
                     <p class="text-gray-300 text-lg">
@@ -14,9 +16,14 @@
                     </p>
                     <p class="text-gray-300 text-lg">
                         24h Change: 
-                        <span class="{% if data.percent_change_24h >= 0 %}text-green-400{% else %}text-red-400{% endif %} font-medium">
-                            {{ "{:.2f}".format(data.percent_change_24h) }}%
-                        </span>
+                        <div class="flex items-center gap-2">
+                            <div class="progress-bar w-full h-2 bg-gray-600 rounded-full overflow-hidden">
+                                <div class="progress h-full rounded-full transition-width duration-300" style="width: {{ (data.percent_change_24h + 100) / 200 * 100 }}%; background: {% if data.percent_change_24h >= 0 %}#10B981{% else %}#EF4444{% endif %}"></div>
+                            </div>
+                            <span class="{% if data.percent_change_24h >= 0 %}text-green-400{% else %}text-red-400{% endif %} text-sm">
+                                {{ "{:.2f}".format(data.percent_change_24h) }}%
+                            </span>
+                        </div>
                     </p>
                     <p class="text-gray-300 text-lg">
                         Market Cap: <span class="font-medium text-indigo-300">${{ "{:.0f}".format(data.market_cap) }}</span>
@@ -26,3 +33,22 @@
         {% endfor %}
     {% endif %}
 </div>
+
+<style>
+    .crypto-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(99, 102, 241, 0.3);
+        border-image: linear-gradient(45deg, #4F46E5, #9333EA) 1;
+    }
+    .progress-bar {
+        height: 8px;
+        border-radius: 4px;
+        background: #374151;
+        overflow: hidden;
+    }
+    .progress {
+        height: 100%;
+        border-radius: 4px;
+        transition: width 0.3s ease;
+    }
+</style>
