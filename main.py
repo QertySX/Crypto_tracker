@@ -102,7 +102,7 @@ async def search_bar(request: Request, name_crypto: str = Query(None)):
             filtered_data[crypto_name] = crypto_data
     
     if filtered_data:
-        logging.info('[INFO] Данные в func_4 найдены!')
+        logging.info(f'[INFO] Данные в func_4 найдены! Криптовалюта: {name_crypto}')
         return templates.TemplateResponse(
             "crypto_list.html", 
             {"request": request, "cryptos": filtered_data, "search": name_crypto}
