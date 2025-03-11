@@ -38,11 +38,8 @@ async def get_raw_crypto_data():
                     logging.error(f'[INFO] Ошибка {response.status}' )
                     return {f"[INFO] HTTP ошибка {response.status}"}
             
-            
-
     except Exception as e:
         print('[INFO] Ошибка: ', e)
-
 
 
     # ФУНКЦИЯ КОТОРАЯ ОБРАБАТЫВАЕТ ПОЛУЧЕННЫЕ ДАННЫЕ ИЗ 1 ФУНКЦИИ
@@ -88,6 +85,7 @@ async def render_crypto_page(request: Request):
     except Exception as e:
         print('[INFO] Ошибка', e)
 
+
     # ФУНКЦИЯ КОТОРАЯ ДОБАВЛЯЕТ ПОИСКОВУЮ СТРОКУ
 @app.get('/search')
 async def search_bar(request: Request, name_crypto: str = Query(None)):
@@ -113,3 +111,10 @@ async def search_bar(request: Request, name_crypto: str = Query(None)):
             {"request": request, "error": f'Криптовалюта "{name_crypto}" не найдена'}
         )
 
+app.get('/register')
+async def register_suer(login, password, reset_password, mail):
+    pass
+
+app.get('/login')
+async def login_user(login, password):
+    pass
