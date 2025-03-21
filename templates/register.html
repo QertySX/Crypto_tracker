@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - Crypto Portfolio</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #1F2937 0%, #111827 100%);
+        }
+        .register-card {
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(31, 41, 55, 0.8);
+            border-image: linear-gradient(45deg, #6366F1, #A855F7) 1;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+        .register-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(99, 102, 241, 0.3);
+            border-image: linear-gradient(45deg, #4F46E5, #9333EA) 1;
+        }
+        .input-field {
+            transition: all 0.3s ease;
+        }
+        .input-field:focus {
+            box-shadow: 0 0 15px rgba(99, 102, 241, 0.3);
+        }
+        .btn-register {
+            background: linear-gradient(90deg, #6366F1, #A855F7);
+        }
+        .btn-register:hover {
+            background: linear-gradient(90deg, #4F46E5, #9333EA);
+        }
+        .btn-back {
+            background: linear-gradient(90deg, #4B5563, #6B7280);
+            transition: all 0.3s ease;
+        }
+        .btn-back:hover {
+            background: linear-gradient(90deg, #6B7280, #9CA3AF);
+        }
+    </style>
+</head>
+<body class="text-gray-100 min-h-screen">
+    <div class="container mx-auto px-4 py-6">
+        <!-- Заголовок -->
+        <div class="text-center mb-12">
+            <h1 class="text-5xl md:text-6xl font-bold text-white mb-4 bg-gradient-to-r from-indigo-400 via-purple-500 to-pink-500 bg-clip-text text-transparent">
+                Register
+            </h1>
+            <p class="text-xl md:text-2xl text-gray-300 max-w-2xl mx-auto">
+                Create your account to start managing your crypto portfolio
+            </p>
+        </div>
+
+        <!-- Форма регистрации -->
+        <div class="max-w-md mx-auto">
+            <div class="register-card p-6 rounded-xl">
+                <form method="post" action="/register" class="flex flex-col gap-4">
+                    <div>
+                        <input type="text" 
+                               name="username" 
+                               placeholder="Username" 
+                               class="input-field w-full px-5 py-3 rounded-xl bg-gray-800/50 border border-gray-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500" 
+                               required>
+                    </div>
+                    <div>
+                        <input type="email" 
+                               name="mail" 
+                               placeholder="Email" 
+                               class="input-field w-full px-5 py-3 rounded-xl bg-gray-800/50 border border-gray-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500" 
+                               required>
+                    </div>
+                    <div>
+                        <input type="password" 
+                               name="password" 
+                               placeholder="Password" 
+                               class="input-field w-full px-5 py-3 rounded-xl bg-gray-800/50 border border-gray-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500" 
+                               required>
+                    </div>
+                    <button type="submit" 
+                            class="btn-register text-white px-6 py-3 rounded-xl font-semibold transition">
+                        Register
+                    </button>
+                </form>
+            </div>
+            <div class="mt-6 text-center">
+                <a href="/crypto" class="btn-back text-white px-6 py-3 rounded-xl font-semibold inline-block">
+                    <i class="fas fa-arrow-left mr-2"></i> Back to Home
+                </a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

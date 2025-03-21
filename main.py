@@ -1,20 +1,33 @@
 import aiohttp
 from config import api_key
 from fastapi import FastAPI, Query, Request
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.templating import Jinja2Templates
+from fastapi.responses import HTMLResponse
 import logging
 from typing import List
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr, field_validator, constr
 import asyncio
 
 
 app = FastAPI()
+
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=['http://127.0.0.1:8000']
+)
 
 templates = Jinja2Templates(directory="templates")
 
 
 logging.basicConfig(level=logging.DEBUG)
 
+
+class UserRegistration(BaseModel):
+    username: str
+    mail: EmailStr
+    password: constr(min_length=8)
 
     # ФУНКЦИЯ ДЛЯ ЗАПРОСА API И ПОЛУЧЕНИЮ СПИСКА КРИПТОВАЛЮТ
 async def get_raw_crypto_data():
@@ -89,32 +102,46 @@ async def render_crypto_page(request: Request):
     # ФУНКЦИЯ КОТОРАЯ ДОБАВЛЯЕТ ПОИСКОВУЮ СТРОКУ
 @app.get('/search')
 async def search_bar(request: Request, name_crypto: str = Query(None)):
-    data = await process_crypto_data()
-    
-    if not name_crypto:
-        return templates.TemplateResponse("crypto_list.html", {"request": request, "cryptos": data})
-    
-    filtered_data = dict()
-    for crypto_name, crypto_data in data.items():
-        if name_crypto.lower() in crypto_name.lower():
-            filtered_data[crypto_name] = crypto_data
-    
-    if filtered_data:
-        logging.info(f'[INFO] Данные в func_4 найдены! Криптовалюта: {name_crypto}')
-        return templates.TemplateResponse(
-            "crypto_list.html", 
-            {"request": request, "cryptos": filtered_data, "search": name_crypto}
-        )
-    else:
-        return templates.TemplateResponse(
-            "crypto_list.html", 
-            {"request": request, "error": f'Криптовалюта "{name_crypto}" не найдена'}
-        )
+    try:
+        data = await process_crypto_data()
+        
+        if not name_crypto:
+            return templates.TemplateResponse("crypto_list.html", {"request": request, "cryptos": data})
+        
+        filtered_data = dict()
+        for crypto_name, crypto_data in data.items():
+            if name_crypto.lower() in crypto_name.lower():
+                filtered_data[crypto_name] = crypto_data
+        
+        if filtered_data:
+            logging.info(f'[INFO] Данные в func_4 найдены! Криптовалюта: {name_crypto}')
+            return templates.TemplateResponse(
+                "crypto_list.html", 
+                {"request": request, "cryptos": filtered_data, "search": name_crypto}
+            )
+        else:
+            return templates.TemplateResponse(
+                "crypto_list.html", 
+                {"request": request, "error": f'Криптовалюта "{name_crypto}" не найдена'}
+            )
+    except Exception as e:
+        print('[INFO] Ошибка', e)
 
-app.get('/register')
-async def register_suer(login, password, reset_password, mail):
-    pass
 
-app.get('/login')
-async def login_user(login, password):
-    pass
+
+@app.get('/register')
+async def page_register(request: Request):
+    try:
+        return templates.TemplateResponse('register.html', {'request': request})
+    except Exception as e:
+        print('[INFO] Ошибка', e)
+
+
+
+@app.post('/register')
+async def register_user(user: UserRegistration):
+    try:
+        return {"message": "User registered successfully", "user": user}
+        return users
+    except Exception as e:
+        print('[INFO] Ошибка', e)
