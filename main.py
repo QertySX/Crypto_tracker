@@ -1,85 +1,41 @@
-import aiohttp
-from config import api_key
+from contextlib import asynccontextmanager
+import uvicorn
 from fastapi import FastAPI, Query, Request
-from fastapi.middleware.cors import CORSMiddleware
 from fastapi.templating import Jinja2Templates
-from fastapi.responses import HTMLResponse
 import logging
-from typing import List
-from pydantic import BaseModel, EmailStr, field_validator, constr
-import asyncio
+
+from sqlalchemy.exc import IntegrityError
+
+from core.models.db_helper import db_helper
+from get_crypto_data import process_crypto_data, get_raw_crypto_data
+from schemas.schemas import UserRegistration
+from core.models.users import Users
 
 
-app = FastAPI()
+# СОЗДАНИЕ БАЗЫ ДАННЫХ
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    try:
+        await db_helper.create_db()
+        logging.info("База данных успешно создана")
+        yield
+    except Exception as e:
+        logging.info('Error ', e)
 
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=['http://127.0.0.1:8000']
-)
+app = FastAPI(lifespan=lifespan)
 
+# Для работы с html
 templates = Jinja2Templates(directory="templates")
 
 
-logging.basicConfig(level=logging.DEBUG)
-
-
-class UserRegistration(BaseModel):
-    username: str
-    mail: EmailStr
-    password: constr(min_length=8)
-
-    # ФУНКЦИЯ ДЛЯ ЗАПРОСА API И ПОЛУЧЕНИЮ СПИСКА КРИПТОВАЛЮТ
-async def get_raw_crypto_data():
-    try:
-        logging.info("Получение данных криптовалюты...")
-        url = 'https://pro-api.coinmarketcap.com/v1/cryptocurrency/listings/latest'
-
-        headers = {
-            'Accepts': 'application/json',
-            'X-CMC_PRO_API_KEY': api_key,
-        }
-
-        async with aiohttp.ClientSession() as session:
-            async with session.get(url, headers=headers) as response:
-
-                if response.status == 200:
-                    result = await response.json()
-                    logging.info("[INFO] Данные в func_1 получены!")
-                    return result
-                else:
-                    logging.error(f'[INFO] Ошибка {response.status}' )
-                    return {f"[INFO] HTTP ошибка {response.status}"}
-            
-    except Exception as e:
-        print('[INFO] Ошибка: ', e)
-
-
-    # ФУНКЦИЯ КОТОРАЯ ОБРАБАТЫВАЕТ ПОЛУЧЕННЫЕ ДАННЫЕ ИЗ 1 ФУНКЦИИ
-async def process_crypto_data() -> dict:
-    try:
-        raw_crypto_data = await get_raw_crypto_data()
-        all_data = dict()
-
-        if 'data' not in raw_crypto_data:
-            logging.error('[INFO] Данные из func_1 не получены')
-            return {"error": "Данные из func_1 не получены"}
-        else:
-            for crypto in raw_crypto_data['data']:
-                necessary_data = {
-                    "price": crypto['quote']['USD']['price'],
-                    "volume_24h": crypto['quote']['USD']['volume_24h'],
-                    "percent_change_24h": crypto['quote']['USD']['percent_change_24h'],
-                    "market_cap": crypto['quote']['USD']['market_cap']
-                }
-                all_data[crypto['name']] = necessary_data
-
-        logging.info("[INFO] Данные в func_2 обработаны!")
-
-        return all_data
-
-    except Exception as e:
-        print('[INFO] Ошибка', e)
+logging.basicConfig(
+    level=logging.DEBUG,
+    handlers=[
+        logging.StreamHandler(),  # Вывод в консоль
+        logging.FileHandler("app.log")  # Вывод в файл
+    ]
+)
 
 
     # ФУНКЦИЯ КОТОРАЯ ПОЛУЧАЕТ ДАННЫЕ И ДЕЛАЕТ ВЕБ-СТРАНИЦУ
@@ -90,13 +46,13 @@ async def render_crypto_page(request: Request):
         page = templates.TemplateResponse("index.html", {"request": request, "cryptos": processed_data})
 
         if 'error' in processed_data:
-            logging.error('[INFO] Ошибка получения данных в func_3')
+            logging.info('[INFO] Ошибка получения данных в func_3')
 
         else:
             return page
 
     except Exception as e:
-        print('[INFO] Ошибка', e)
+        logging.info(f'Ошибка:', e)
 
 
     # ФУНКЦИЯ КОТОРАЯ ДОБАВЛЯЕТ ПОИСКОВУЮ СТРОКУ
@@ -125,8 +81,7 @@ async def search_bar(request: Request, name_crypto: str = Query(None)):
                 {"request": request, "error": f'Криптовалюта "{name_crypto}" не найдена'}
             )
     except Exception as e:
-        print('[INFO] Ошибка', e)
-
+        logging.info(f'Ошибка:', e)
 
 
 @app.get('/register')
@@ -134,14 +89,36 @@ async def page_register(request: Request):
     try:
         return templates.TemplateResponse('register.html', {'request': request})
     except Exception as e:
-        print('[INFO] Ошибка', e)
-
+        logging.info(f'Ошибка:', e)
 
 
 @app.post('/register')
 async def register_user(user: UserRegistration):
     try:
-        return {"message": "User registered successfully", "user": user}
-        return users
+        logging.debug(f"Получены данные пользователя: {user}")
+        async with db_helper.session_factory() as session:
+            add_user = Users(
+                username=user.username,
+                mail=user.mail,
+                password=user.password
+            )
+            session.add(add_user)
+            logging.info(f'Пользователь {user.username} прошел регистриацию')
+            await session.commit()
+            return {"message": "User registered successfully"}
+
+
+    except IntegrityError as e:
+        logging.error(f'Пользователь с таким именем или почтой уже существует: {e}')
+        return {"error": "Пользователь с таким именем или почтой уже существует"}
+
     except Exception as e:
-        print('[INFO] Ошибка', e)
+        logging.exception(f'Ошибка при регистрации пользователя: {e}')
+        return {"error": "Ошибка при регистрации пользователя"}
+
+
+
+if __name__ == "__main__":
+    uvicorn.run("main:app", reload=True)
+
+

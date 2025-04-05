@@ -8,3 +8,4 @@ config.py
 __pycache__/config.cpython-312.pyc
 .env
 __pycache__
+config_db.py
