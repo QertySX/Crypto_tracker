@@ -1,0 +1,26 @@
+INFO:root:Получение данных криптовалюты...
+INFO:root:[INFO] Данные в func_1 получены!
+INFO:root:[INFO] Данные в func_2 обработаны!
+INFO:root:[INFO] Данные в func_4 найдены! Криптовалюта: tron
+INFO:root:Получение данных криптовалюты...
+INFO:root:[INFO] Данные в func_1 получены!
+INFO:root:[INFO] Данные в func_2 обработаны!
+INFO:root:Получение данных криптовалюты...
+INFO:root:[INFO] Данные в func_1 получены!
+INFO:root:[INFO] Данные в func_2 обработаны!
+DEBUG:python_multipart.multipart:Calling on_field_start with no data
+DEBUG:python_multipart.multipart:Calling on_field_name with data[0:8]
+DEBUG:python_multipart.multipart:Calling on_field_data with data[9:20]
+DEBUG:python_multipart.multipart:Calling on_field_end with no data
+DEBUG:python_multipart.multipart:Calling on_field_start with no data
+DEBUG:python_multipart.multipart:Calling on_field_name with data[21:25]
+DEBUG:python_multipart.multipart:Calling on_field_data with data[26:52]
+DEBUG:python_multipart.multipart:Calling on_field_end with no data
+DEBUG:python_multipart.multipart:Calling on_field_start with no data
+DEBUG:python_multipart.multipart:Calling on_field_name with data[53:61]
+DEBUG:python_multipart.multipart:Calling on_field_data with data[62:71]
+DEBUG:python_multipart.multipart:Calling on_field_end with no data
+DEBUG:python_multipart.multipart:Calling on_end with no data
+DEBUG:root:Получены данные: username=ArtemGirus8, mail=artem.girus212@gmail.com, password=qweqweqwe
+INFO:root:Пользователь ArtemGirus8 прошел регистрацию
+DEBUG:root:Коммит выполнен

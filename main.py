@@ -3,9 +3,8 @@ import uvicorn
 from fastapi import FastAPI, Query, Request
 from fastapi.templating import Jinja2Templates
 import logging
-
+from fastapi import Form
 from sqlalchemy.exc import IntegrityError
-
 from core.models.db_helper import db_helper
 from get_crypto_data import process_crypto_data, get_raw_crypto_data
 from schemas.schemas import UserRegistration
@@ -33,7 +32,7 @@ logging.basicConfig(
     level=logging.DEBUG,
     handlers=[
         logging.StreamHandler(),  # Вывод в консоль
-        logging.FileHandler("app.log")  # Вывод в файл
+        logging.FileHandler("app.log", encoding='utf-8')  # Вывод в файл
     ]
 )
 
@@ -92,21 +91,29 @@ async def page_register(request: Request):
         logging.info(f'Ошибка:', e)
 
 
-@app.post('/register')
-async def register_user(user: UserRegistration):
+@app.post('/register')  # Добавлен Form, так как POST-запрос приходит не в JSON, а в html формате
+async def register_user(username: str = Form(...), mail: str = Form(...), password: str = Form(...)):
     try:
-        logging.debug(f"Получены данные пользователя: {user}")
-        async with db_helper.session_factory() as session:
-            add_user = Users(
-                username=user.username,
-                mail=user.mail,
-                password=user.password
-            )
-            session.add(add_user)
-            logging.info(f'Пользователь {user.username} прошел регистриацию')
-            await session.commit()
-            return {"message": "User registered successfully"}
+        logging.debug(f"Получены данные: username={username}, mail={mail}, password={password}")
 
+        # Преобразование Form в Pydantic модель для дальнейшей валидации данных
+        user_data = UserRegistration(username=username, mail=mail, password=password)
+
+        # Инициализируем класс Users с параметрами, полученными от пользователя
+        add_user = Users(
+            username=user_data.username,
+            mail=user_data.mail,
+            password=user_data.password
+        )
+
+        # Добавляем пользователя в сессию
+        async with db_helper.session_factory() as session:
+            session.add(add_user)
+            logging.info(f'Пользователь {add_user.username} прошел регистрацию')
+            await session.commit()
+            logging.debug("Коммит выполнен")
+
+        return {"message": f"User {add_user.username} registered successfully"}
 
     except IntegrityError as e:
         logging.error(f'Пользователь с таким именем или почтой уже существует: {e}')
@@ -118,7 +125,8 @@ async def register_user(user: UserRegistration):
 
 
 
+
 if __name__ == "__main__":
-    uvicorn.run("main:app", reload=True)
+    uvicorn.run("main:app", reload=False)
 
 
